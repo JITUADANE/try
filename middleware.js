@@ -1,4 +1,4 @@
-// Define `authPage` first
+// learn middle ware 
 const authPage = (PERMISSION) => {
     return (req, res, next) => {
         const userRole = req.headers.role;
@@ -10,11 +10,9 @@ const authPage = (PERMISSION) => {
     };
 };
 
-// Define `authcourse after `authPage`
 const authcourse = (req, res, next) => {
     // Your logic for authcourse, if any
     next();
 };
 
-// Export both functions
 module.exports = { authPage, authcourse };

@@ -5,11 +5,31 @@ const jwt = require('jsonwebtoken');
 const app = express();
 const cookieParser = require('cookie-parser');
 const methodOverride = require('method-override');
+const mongoose = require('mongoose');
 
 
 app.use(methodOverride('_method')); // This enables support for `DELETE` via the `_method` query
 app.use(express.json());
 app.use(cookieParser());
+
+/// mongooseconnet
+
+mongoose.connect('mongodb+srv://jituadaneb:gACne3sdtaOStx1t@authentication2.0zu0m.mongodb.net/My_authentication_database?retryWrites=true&w=majority', {
+})
+  .then(() => console.log('Connected to my authentication_MongoDB Atlas'))
+  .catch(err => console.error('MongoDB connection failed:', err));
+
+// to define the structer (blue print) in our mongodb mongoose.Schema
+const userSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    role: { type: String, enum: ['Attendee', 'Organizer', 'Admin'], default: 'Attendee' },
+});
+
+const User = mongoose.model('User', userSchema);
+
+module.exports = User;
 
 
 // So i can see on the browser i will use  view engine to EJS
@@ -33,7 +53,6 @@ function authenticateToken(req, res, next) {
 }
 
 
-// Middleware for role-based authorization
 function authorizeRoles(roles) {
     return (req, res, next) => {
         if (!roles.includes(req.user.role)) {
@@ -54,7 +73,6 @@ app.get('/login', (req, res) => {
 });
 
 
-// Protected route for index
 app.get('/index', authenticateToken, (req, res) => {
     res.render('index', { user: req.user });
 });
@@ -109,6 +127,66 @@ app.post('/login', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
+
+// creat a new user but with a role 
+app.post('/users', async (req, res) => {
+    try {
+        const hashedPassword = await bcrypt.hash(req.body.password, 10);
+        const user = new User({
+            name: req.body.name,
+            email: req.body.email,
+            password: hashedPassword,
+            role: req.body.role || 'Attendee',
+        });
+
+        // to ave on our db
+        await user.save();
+        res.status(201).send(user);
+    } catch (err) {
+        res.status(400).send(err.message);
+    }
+});
+/// read 
+app.get('/users', authenticateToken, authorizeRoles(['Admin']), async (req, res) => {
+    try {
+        const users = await User.find();// find from mdb
+        res.send(users);
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+});
+///
+
+
+//update by id 
+app.put('/users/:id', authenticateToken, async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);// find by id ie email fo us
+        if (!user) return res.status(404).send('User not found');
+
+        user.name = req.body.name || user.name;// update
+        user.email = req.body.email || user.email;
+        user.role = req.body.role || user.role;
+        await user.save();// untill save wait
+
+        res.send(user);
+    } catch (err) {
+        res.status(400).send(err.message);
+    }
+});
+// delete 
+app.delete('/users/:id', authenticateToken, authorizeRoles(['Admin']), async (req, res) => {
+    try {
+        const user = await User.findByIdAndDelete(req.params.id);
+        if (!user) return res.status(404).send('User not found');
+        res.send('User deleted successfully');
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+});
+
+
+
 app.delete('/logout', (req, res) => {
     res.clearCookie('token');
     res.redirect('/login'); 
