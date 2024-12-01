@@ -9,8 +9,11 @@ const { dbConnect, User } = require('./config/dbConnect'); // Import database co
 const authRoutes = require('./routers/authRoutes'); // Import authentication routes
 const userRoutes = require('./routers/userRoutes'); // Import user management routes
 const nodemailer = require('nodemailer');
+const eventRoutes = require("./routes/events");
 
 const app = express(); // Initialize Express app
+
+app.use("/api/events", eventRoutes); // Base URL for event routes
 
 // Middleware setup
 app.use(express.json()); // Parse JSON request bodies
