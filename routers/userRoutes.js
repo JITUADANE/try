@@ -18,6 +18,7 @@ router.get('/organizer', (req, res) => {
 router.get('/attendee', (req, res) => {
     res.json({ message: "Hello, Attendee!" });
 });
-router.get('/', authenticateToken, authorizeRoles(['Admin']), userController.getAllUsers)
+
+router.get('/',authenticateToken, authorizeRoles(["Admin"]), userController.getAllUsers)
 module.exports = router;
 

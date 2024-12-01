@@ -5,11 +5,14 @@ const jwt = require('jsonwebtoken'); // Import JSON Web Token for authentication
 const cookieParser = require('cookie-parser'); // Import Cookie Parser
 const methodOverride = require('method-override'); // Import Method Override for supporting HTTP verbs like DELETE
 const crypto = require('crypto'); // Import Crypto for secure token generation
-const { dbConnect, User } = require('./config/dbConnect'); // Import database connection and User model
+const { dbConnect } = require('./config/dbConnect'); // Import database connection and User model
 const authRoutes = require('./routers/authRoutes'); // Import authentication routes
 const userRoutes = require('./routers/userRoutes'); // Import user management routes
 const nodemailer = require('nodemailer');
 const eventRoutes = require("./routers/events");
+const { authenticateToken} = require('./middlewares/authenticateToken');
+const { authorizeRoles }  = require('./middlewares/authorizeRoles');
+const User = require('./models/user')
 
 const app = express(); // Initialize Express app
 
@@ -86,6 +89,7 @@ app.get('/login', (req, res) => {
 app.get('/index', authenticateToken, (req, res) => {
     res.render('index', { user: req.user });
 });
+  
 
 // to accept or register a new user based on role
 app.post('/register', async (req, res) => {
@@ -97,7 +101,7 @@ app.post('/register', async (req, res) => {
         const user = new User({ 
             name: req.body.name, 
             email: req.body.email,
-            username: req.body.username,
+            userName: req.body.userName,
             password: hashedPassword,
             role: role
         });
@@ -153,7 +157,7 @@ app.post('/users', async (req, res) => {
         const user = new User({
             name: req.body.name,
             email: req.body.email,
-            username: req.body.username,
+            userName: req.body.userName,
             password: hashedPassword,
             role: req.body.role || 'Attendee',
         });
@@ -175,7 +179,7 @@ app.put('/users/:id', authenticateToken, async (req, res) => {
 
         user.name = req.body.name || user.name; // update
         user.email = req.body.email || user.email;
-        user.username = req.body.email || user.username;
+        user.userName = req.body.email || user.userName;
         user.role = req.body.role || user.role;
         await user.save(); // until save wait
 

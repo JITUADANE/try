@@ -45,10 +45,10 @@ const eventSchema = new mongoose.Schema({
             default: 0, // Default to 0 if no tickets have been sold yet
         }
     }
-}, 
-{
+}, {
     timestamps: true, // Automatically add createdAt and updatedAt fields
 });
 
 /// i will creat a schema like this for event 
-// 
+// add rsvp 
+module.exports = mongoose.model('Event', eventSchema);

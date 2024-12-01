@@ -4,18 +4,18 @@ const User = require("../models/userModel");
 
 const registerUser = async (req, res) => {
     try {
-        const { username, password, role } = req.body;
-        if (!username || !password) return res.status(400).json({ message: 'Username and password are required' });
+        const { userName, password, role } = req.body;
+        if (!userName || !password) return res.status(400).json({ message: 'Username and password are required' });
 
         // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Create a new user
-        const newUser = new User({ username, password: hashedPassword, role });
+        const newUser = new User({ userName, password: hashedPassword, role });
         await newUser.save();
 
         // Respond with success
-        res.status(201).json({ message: `User registered with username: ${username}` });
+        res.status(201).json({ message: `User registered with userName: ${userName}` });
     } catch (err) {
         res.status(500).json({ message: "Something went wrong during registration." });
     }
@@ -23,27 +23,27 @@ const registerUser = async (req, res) => {
 
 const login = async (req, res) => {
     try {
-        const { username, password } = req.body;
+        const { userName, password } = req.body;
 
-        // Find user by username
-        const user = await User.findOne({ username });
+        // Find user by userName
+        const user = await User.findOne({ userName });
         if (!user) {
-            return res.status(404).render('login', { messages: { error: `Cannot find user with username: ${username}` } });
+            return res.status(404).render('login', { messages: { error: `Cannot find user with userName: ${userName}` } });
         }
 
-        const duplicate = await User.findOne({ username: user.username }).exec();
+        const duplicate = await User.findOne({ userName: user.userName }).exec();
         if (duplicate) return res.sendStatus(409);
 
         try {
             const hashedPwd = await bcrypt.hash(password, 10);
 
             const result = await User.create({
-                "username": username,
+                "userName": userName,
                 // "role": {"user": 2001}, you don't need to have a role because you have done that previously
                 "password": hashedPwd
             });
             console.log(result);
-            res.status(201).json({ success: `New user ${username} created!` });
+            res.status(201).json({ success: `New user ${userName} created!` });
         } catch (err) {
             res.status(500).json({ message: err.message });
         }

@@ -13,16 +13,5 @@ const dbConnect = async () => {
     }
 };
 
-// User Schema
-const userSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    role: { type: String, enum: ['Attendee', 'Organizer', 'Admin'], default: 'Attendee' },
-});
-
-// User Model
-const User = mongoose.model('User', userSchema);
-
 // Export Both
-module.exports = { dbConnect, User };
+module.exports = { dbConnect };
