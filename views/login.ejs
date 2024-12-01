@@ -3,10 +3,14 @@
     <p style="color: red;"><%= messages.error %></p>
 <% } %>
 <form action="/login" method="POST">
-    <input type="email" name="email" placeholder="Email" required>
-    <input type="password" name="password" placeholder="Password" required>
-    <button type="submit">Login</button>
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" required>
+    <label for="username">username:</label>
+    <input type="username" id="username" name="username" required>
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required>
     
+    <button type="submit">Login</button>
 </form>
 
 <a href="/register">Register</a>
