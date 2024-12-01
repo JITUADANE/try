@@ -9,7 +9,7 @@ const { dbConnect, User } = require('./config/dbConnect'); // Import database co
 const authRoutes = require('./routers/authRoutes'); // Import authentication routes
 const userRoutes = require('./routers/userRoutes'); // Import user management routes
 const nodemailer = require('nodemailer');
-const eventRoutes = require("./routes/events");
+const eventRoutes = require("./routers/events");
 
 const app = express(); // Initialize Express app
 
@@ -69,26 +69,9 @@ transporter.sendMail({
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: false }));
 // Middleware for authenticating JWT tokens
-function authenticateToken(req, res, next) {
-    const token = req.cookies.token;
-    if (!token) return res.status(401).send('Token missing, please log in'); // so you have a save web so ppl cant asscess it with out the password
 
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
-        console.log('JWT Secret:', process.env.ACCESS_TOKEN_SECRET); 
-        if (err) return res.status(403).send('Invalid token');
-        req.user = user; // Attach decoded user info to request
-        next();
-    });
-}
 
-function authorizeRoles(roles) {
-    return (req, res, next) => {
-        if (!roles.includes(req.user.role)) {
-            return res.status(403).send('Access Denied');
-        }
-        next();
-    };
-}
+
 
 // to print registration page
 app.get('/register', (req, res) => {
@@ -183,17 +166,8 @@ app.post('/users', async (req, res) => {
     }
 });
 
-/// read 
-app.get('/users', authenticateToken, authorizeRoles(['Admin']), async (req, res) => {
-    try {
-        const users = await User.find(); // find from mdb
-        res.send(users);
-    } catch (err) {
-        res.status(500).send(err.message);
-    }
-});
-
-//update by id 
+ 
+//update by id
 app.put('/users/:id', authenticateToken, async (req, res) => {
     try {
         const user = await User.findById(req.params.id); // find by id
@@ -211,7 +185,7 @@ app.put('/users/:id', authenticateToken, async (req, res) => {
     }
 });
 
-// delete 
+// delete  this makes the user only avalable to the admin not user 
 app.delete('/users/:id', authenticateToken, authorizeRoles(['Admin']), async (req, res) => {
     try {
         const user = await User.findByIdAndDelete(req.params.id);

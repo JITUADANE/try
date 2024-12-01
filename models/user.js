@@ -8,10 +8,10 @@ const userSchema = new mongoose.Schema({
     userName: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     role: { type: String, enum: ['Attendee', 'Organizer', 'Admin'], default: 'Attendee' },
-});
+},
 {
     timestamps: true,
-}
-module.exports = mongoose.model('User', userSchema);
+});
+module.exports = mongoose.model('Userd', userSchema);
 
 // how do i export this 
