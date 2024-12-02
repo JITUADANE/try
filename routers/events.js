@@ -1,8 +1,26 @@
 const express = require("express");
 const router = express.Router();
 const Event = require("../models/Event"); // Path to your Event model
+const Joi = require("joi"); // Joi for validation
 
-// CREATE: Add a new event
+// Validation schema
+const eventSchema = Joi.object({
+  title: Joi.string().required().trim(),
+  description: Joi.string().required().trim(),
+  date: Joi.date().required(),
+  time: Joi.string().required().trim(),
+  location: Joi.string().required().trim(),
+  organizerId: Joi.string().required(),
+  ticketDetails: Joi.object({
+    price: Joi.number().required(),
+    availableTickets: Joi.number().required(),
+    soldTickets: Joi.number().default(0),
+  }).required(),
+});
+
+
+
+// CREATE new event
 router.post("/", async (req, res) => {
   try {
     const event = new Event(req.body);
